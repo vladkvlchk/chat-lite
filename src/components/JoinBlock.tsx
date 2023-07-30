@@ -1,8 +1,24 @@
-import React from "react";
+import axios from "axios";
+import React, { useState } from "react";
 
-const JoinBlock : React.FC = () => {
-  const onClickConnect = () => {
-    // io("http://localhost:5000");
+type JoinBlockType = {
+  onLogin: (obj: { roomId: string; userName: string }) => void;
+};
+
+const JoinBlock: React.FC<JoinBlockType> = ({ onLogin }) => {
+  const [roomId, setRoomId] = useState<string>("");
+  const [userName, setUserName] = useState<string>("");
+  const [isLoading, setLoading] = useState<boolean>(false);
+
+  const onClickConnect = async () => {
+    if (!roomId || !userName) {
+      return alert("invalid data");
+    }
+    const obj = {roomId, userName}
+    setLoading(true);
+    await axios.post("http://localhost:5000/rooms", obj);
+    onLogin(obj);
+    setLoading(false);
   };
 
   return (
@@ -11,20 +27,25 @@ const JoinBlock : React.FC = () => {
         className="border-b m-4 outline-none"
         type="text"
         placeholder="Room ID"
+        value={roomId}
+        onChange={(e) => setRoomId(e.target.value)}
       />
       <input
         className="border-b m-4 outline-none"
         type="text"
         placeholder="Your name"
+        value={userName}
+        onChange={(e) => setUserName(e.target.value)}
       />
       <button
         className="border bg-gray-100 h-10 rounded-xl"
         onClick={onClickConnect}
+        disabled={isLoading}
       >
-        connect
+        {isLoading ? "connecting..." : "connect"}
       </button>
     </div>
   );
 };
 
-export default JoinBlock
+export default JoinBlock;
